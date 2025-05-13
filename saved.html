@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <title>Series Guardadas</title>
+  </head>
+  <body>
+    <h1>Mis Series Guardadas</h1>
+
+    <div class="order">
+      <button onclick="Serie.orderBy('name')">Ordenar por name</button>
+      <button onclick="Serie.orderBy('language')">Ordenar por language</button>
+      <button onclick="Serie.orderBy('genres')">Ordenar por genres</button>
+    </div>
+
+    <div id="series-container" class="serie-container"></div>
+
+    <script src="serie.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", Serie.loadSavedSeries);
+    </script>
+  </body>
+</html>

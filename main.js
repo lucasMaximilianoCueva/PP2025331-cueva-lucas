@@ -1,39 +1,58 @@
-// on load page
+const series = [];
+let currentPage = 1;
+const maxSeries = 6;
 document.addEventListener("DOMContentLoaded", () => {
-  const seriesContainer = document.getElementById('series');
-  const series = [];
+  fetchSeries();
+});
 
-  const fetchPromises = [];
-  for (let i = 1; i < 7; i++) {
-    fetchPromises.push(
-      fetch(`https://api.tvmaze.com/shows/${i}`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Error fetching series ${i}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          const serie = Serie.createFromJsonString(data);
-          series.push(serie);
-          return serie;
-        })
-        .catch(error => {
-          console.error(`Error processing series ${i}:`, error);
-        })
-    );
+const fetchSeries = async () => {
+  const seriesContainer = document.getElementById("series");
+  series.length = 0;
+
+  let startId = currentPage;
+  let validSeriesCount = 0;
+
+  while (validSeriesCount < maxSeries) {
+    try {
+      const response = await fetch(`https://api.tvmaze.com/shows/${startId}`);
+      
+      if (response.ok) {
+        const data = await response.json();
+        const serie = Serie.createFromJsonString(data);
+        series.push(serie);
+        validSeriesCount++;
+      }
+    } catch (error) {
+      console.error(`Error fetching serie ${startId}:`, error);
+    }
+    startId++;
   }
 
-  Promise.all(fetchPromises)
-    .then(() => {
-      series.sort((a, b) => a.id - b.id);
-      
-      series.forEach(serie => {
-        const element = serie.createHtmlElement(serie);
-        seriesContainer.appendChild(element);
-      });
-    })
-    .catch(error => {
-      console.error('Error loading series:', error);
-    });
-});
+  currentPage = startId - maxSeries;
+
+  series.sort((a, b) => a.id - b.id);
+
+  series.forEach((serie) => {
+    const element = serie.createHtmlElement(serie);
+    seriesContainer.appendChild(element);
+  });
+};
+
+const nextPage = () => {
+  series.forEach((serie) => {
+    serie.deleteHtmlElement(serie);
+  });
+  currentPage += maxSeries;
+  fetchSeries();
+};
+
+const previousPage = () => {
+  if (currentPage <= 1) {
+    return;
+  }
+  series.forEach((serie) => {
+    serie.deleteHtmlElement(serie);
+  });
+  currentPage = Math.max(1, currentPage - maxSeries);
+  fetchSeries();
+};
